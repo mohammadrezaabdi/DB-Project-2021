@@ -2,11 +2,8 @@
 *
 
 # But not these files...
-!.md
-!.gitignore
-!.sql
-!.txt
-!.pdf
-!*/*.sql
-!*/*.txt
-!*/*.pdf
+!*.md
+!*.gitignore
+!*.sql
+!*.txt
+!*.pdf
