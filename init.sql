@@ -5,3 +5,5 @@ drop database if exists ImdbDB;
 create database ImdbDB;
 set search_path to ImdbDB;
 create schema if not exists public;
+create extension if not exists "uuid-ossp";
+create extension if not exists "pgcrypto";
