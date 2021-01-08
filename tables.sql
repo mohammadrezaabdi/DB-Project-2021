@@ -16,30 +16,30 @@ drop table if exists users cascade;
 
 create table Users
 (
-    UID    uuid          not null,      -- set trigger for assign
-    NAME   user_name     not null unique,
-    MAIL   email_address not null unique,
-    PASS   text          not null,      -- set trigger for hashing
+    UID    uuid                        not null,
+    NAME   user_name                   not null unique,
+    MAIL   email_address               not null unique,
+    PASS   valid_password              not null,
     PHONE  phone_number,
-    UTYPE  user_type     not null,      -- set trigger for promotion
-    ELIMIT user_edit_number_limitation, -- set trigger for decrease
+    UTYPE  user_type                   not null,
+    ELIMIT user_edit_number_limitation not null, -- todo change during editing
     primary key (UID)
 );
 
 create table Crew
 (
-    CID   uuid          not null, -- set trigger for assign
+    CID   uuid          not null,
     NAME  user_name     not null,
     MAIL  email_address not null unique,
     PHONE phone_number,
-    BY    valid_year,
-    BM    valid_month,
-    BD    valid_day,
-    DY    valid_year,
-    DM    valid_month,
-    DD    valid_day,
+    BYEAR valid_year,
+    BMON  valid_month,
+    BDAY  valid_day,
+    DYEAR valid_year,
+    DMON  valid_month,
+    DDAY  valid_day,
     SEX   sex           not null,
-    ISDIR boolean       not null, --set trigger for some one at least has a job
+    ISDIR boolean       not null,
     ISPRO boolean       not null,
     ISACT boolean       not null,
     ISWRT boolean       not null,
@@ -48,7 +48,7 @@ create table Crew
 
 create table Film
 (
-    FID   uuid        not null, -- set trigger for assign
+    FID   uuid        not null, -- set trigger for assign and not editable
     NAME  text        not null, -- todo set proper regex
     FYR   valid_year,
     TYR   valid_year,           -- set trigger for check less than
@@ -104,7 +104,6 @@ create table Country
     foreign key (FID) references Film (FID) on update cascade on delete cascade
 );
 
-
 create table Review
 (
     UID   uuid not null,
@@ -127,7 +126,6 @@ create table InterestedIn
     foreign key (FID) references Film (FID)
 );
 
-
 create table FirstRole
 (
     CID uuid not null,
@@ -138,7 +136,6 @@ create table FirstRole
     foreign key (FID) references Film (FID)
 );
 
-
 create table Acts
 (
     CID uuid not null,
@@ -148,7 +145,6 @@ create table Acts
     foreign key (CID) references Crew (CID),
     foreign key (FID) references Film (FID)
 );
-
 
 create table Writes
 (
