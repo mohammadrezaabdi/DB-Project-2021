@@ -1,68 +1,67 @@
-drop table if exists award;
-drop table if exists produces;
-drop table if exists writes;
-drop table if exists acts;
-drop table if exists firstRole;
-drop table if exists interestedin;
-drop table if exists Review;
-drop table if exists country;
-drop table if exists picturelink;
-drop table if exists trailerlink;
-drop table if exists Review;
-drop table if exists season;
-drop table if exists film;
-drop table if exists crew;
-drop table if exists users;
+drop table if exists award cascade;
+drop table if exists produces cascade;
+drop table if exists writes cascade;
+drop table if exists acts cascade;
+drop table if exists firstRole cascade;
+drop table if exists interestedin cascade;
+drop table if exists Review cascade;
+drop table if exists country cascade;
+drop table if exists picturelink cascade;
+drop table if exists trailerlink cascade;
+drop table if exists Review cascade;
+drop table if exists season cascade;
+drop table if exists film cascade;
+drop table if exists crew cascade;
+drop table if exists users cascade;
 
--- table making queries
 create table Users
 (
-    UID    uuid    not null,        -- set trigger for assign
-    NAME   text    not null unique,
-    MAIL   text    not null unique, -- set trigger for validation
-    PASS   text    not null,        -- set trigger for hashing
-    PHONE  text,                    -- set trigger for validation
-    UTYPE  char(1) not null,
-    ELIMIT smallint,                -- the default limit fir number of editing for free account
+    UID    uuid          not null,      -- set trigger for assign
+    NAME   user_name     not null unique,
+    MAIL   email_address not null unique,
+    PASS   text          not null,      -- set trigger for hashing
+    PHONE  phone_number,
+    UTYPE  user_type     not null,      -- set trigger for promotion
+    ELIMIT user_edit_number_limitation, -- set trigger for decrease
     primary key (UID)
 );
 
 create table Crew
 (
-    CID   uuid    not null,        -- set trigger for assign
-    NAME  text    not null,
-    MAIL  text    not null unique, -- set trigger for validation
-    PHONE text,                    -- set trigger for validation
-    BY    smallint,                -- set constraint
-    BM    char(3),                 -- set constraint
-    BD    smallint,                -- set constraint
-    DY    smallint,                -- set constraint
-    DM    char(3),                 -- set constraint
-    DD    smallint,                -- set constraint
-    SEX   char(1),                 -- set constraint
-    ISDIR boolean not null,        --set trigger for some one at least has a job
-    ISPRO boolean not null,
-    ISACT boolean not null,
-    ISWRT boolean not null,
+    CID   uuid          not null, -- set trigger for assign
+    NAME  user_name     not null,
+    MAIL  email_address not null unique,
+    PHONE phone_number,
+    BY    valid_year,
+    BM    valid_month,
+    BD    valid_day,
+    DY    valid_year,
+    DM    valid_month,
+    DD    valid_day,
+    SEX   sex           not null,
+    ISDIR boolean       not null, --set trigger for some one at least has a job
+    ISPRO boolean       not null,
+    ISACT boolean       not null,
+    ISWRT boolean       not null,
     primary key (CID)
 );
 
 create table Film
 (
-    FID   uuid    not null, -- set trigger for assign
-    NAME  text    not null,
-    FYR   smallint,         -- set constraint
-    TYR   smallint,         -- set constraint
-    LANG  text,
-    DUR   smallint,         -- set constraint
-    GENRE text,
-    BUDG  numeric(10, 5),   -- set constraint
-    PLOTL text,
-    REVEN numeric(10, 5),   -- set constraint
-    AGER  text,             -- set constraint
-    LEDIT date    not null, -- set default
-    ISSER boolean not null,
-    DIRID uuid,             -- set trigger for existence
+    FID   uuid        not null, -- set trigger for assign
+    NAME  text        not null, -- todo set proper regex
+    FYR   valid_year,
+    TYR   valid_year,           -- set trigger for check less than
+    LANG  varchar(64),          -- check the validation by trigger
+    DUR   normal_number,
+    GENRE set_of_words,         -- todo checking with real names by trigger
+    BUDG  million_dollar,
+    PLOTL link,
+    REVEN million_dollar,
+    AGER  mpa_film_rating,
+    LEDIT modify_date not null,
+    ISSER boolean     not null,
+    DIRID uuid,
     primary key (FID),
     unique (NAME, FYR, TYR),
     foreign key (DIRID) references Crew (CID) on update cascade on delete cascade
@@ -70,9 +69,9 @@ create table Film
 
 create table Season
 (
-    FID   uuid     not null,
-    SNUM  smallint not null, -- set constraint
-    EPCNT smallint,          -- set constraint
+    FID   uuid          not null,
+    SNUM  normal_number not null,
+    EPCNT normal_number,
     primary key (FID, SNUM),
     unique (FID, SNUM),
     foreign key (FID) references Film (FID) on update cascade on delete cascade
@@ -81,7 +80,7 @@ create table Season
 create table TrailerLink
 (
     FID  uuid not null,
-    LINK text not null,
+    LINK link not null,
     primary key (FID, LINK),
     unique (FID, LINK),
     foreign key (FID) references Film (FID) on update cascade on delete cascade
@@ -90,7 +89,7 @@ create table TrailerLink
 create table PictureLink
 (
     FID  uuid not null,
-    LINK text not null,
+    LINK link not null,
     primary key (FID, LINK),
     unique (FID, LINK),
     foreign key (FID) references Film (FID) on update cascade on delete cascade
@@ -99,7 +98,7 @@ create table PictureLink
 create table Country
 (
     FID  uuid        not null,
-    NAME varchar(20) not null, -- set constraint for existence
+    NAME varchar(64) not null, -- check the validation by trigger
     primary key (FID, NAME),
     unique (FID, NAME),
     foreign key (FID) references Film (FID) on update cascade on delete cascade
@@ -108,9 +107,9 @@ create table Country
 
 create table Review
 (
-    UID   uuid          not null,
-    FID   uuid          not null,
-    RATE  numeric(3, 1) not null, -- set constraint
+    UID   uuid not null,
+    FID   uuid not null,
+    RATE  rate not null,
     DESCL text,
     primary key (UID, FID),
     unique (UID, FID),
@@ -173,11 +172,11 @@ create table Produces
 
 create table Award
 (
-    TITLE varchar(40) not null, -- set constraint
-    FEST  varchar(20) not null, -- set constraint
-    YEAR  smallint    not null, -- set constraint
-    FID   uuid        not null,
-    CID   uuid        not null,
+    TITLE multi_word_name not null, -- todo checking with real names by trigger
+    FEST  multi_word_name not null, -- todo checking with real names by trigger
+    YEAR  valid_year      not null,
+    FID   uuid            not null,
+    CID   uuid            not null,
     primary key (TITLE, FEST, FID, CID),
     unique (TITLE, FEST, FID, CID),
     foreign key (CID) references Crew (CID),

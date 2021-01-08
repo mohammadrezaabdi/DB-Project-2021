@@ -7,3 +7,5 @@
 !*.sql
 !*.txt
 !*.pdf
+!*.csv
+
