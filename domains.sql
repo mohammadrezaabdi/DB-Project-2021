@@ -67,7 +67,7 @@ create domain mpa_film_rating as varchar(5) -- The Motion Picture Association (M
 create domain million_dollar as numeric(10, 5)
     check (value >= 0.0);
 
-create domain modify_date as text default to_char(current_timestamp, 'YYYY-MM-DD HH:MM:SS')
+create domain modify_date as text
     check (value ~ '^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$');
 
 create domain rate as numeric(3, 1)

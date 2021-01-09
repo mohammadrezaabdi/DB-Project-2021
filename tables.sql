@@ -48,18 +48,18 @@ create table Crew
 
 create table Film
 (
-    FID   uuid        not null, -- set trigger for assign and not editable
+    FID   uuid        not null,
     NAME  text        not null, -- todo set proper regex
     FYR   valid_year,
-    TYR   valid_year,           -- set trigger for check less than
-    LANG  varchar(64),          -- check the validation by trigger
+    TYR   valid_year,
+    LANG  varchar(64),
     DUR   normal_number,
     GENRE set_of_words,         -- todo checking with real names by trigger
     BUDG  million_dollar,
     PLOTL link,
     REVEN million_dollar,
     AGER  mpa_film_rating,
-    LEDIT modify_date not null,
+    TSTMP modify_date not null,
     ISSER boolean     not null,
     DIRID uuid,
     primary key (FID),
@@ -98,7 +98,7 @@ create table PictureLink
 create table Country
 (
     FID  uuid        not null,
-    NAME varchar(64) not null, -- check the validation by trigger
+    NAME varchar(64) not null,
     primary key (FID, NAME),
     unique (FID, NAME),
     foreign key (FID) references Film (FID) on update cascade on delete cascade
