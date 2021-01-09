@@ -7,6 +7,9 @@ begin
     if new.pass is NULL then
         raise exception 'user password cannot be empty';
     end if;
+    if new.uid is not null then
+        raise exception 'user id is read only field';
+    end if;
     new.uid := uuid_generate_v3(uuid_ns_oid(), new.name);
     new.pass := crypt(new.pass, gen_salt('bf'));
     return new;
@@ -61,9 +64,9 @@ end;
 $can_user_edit$ language plpgsql;
 
 drop trigger if exists insert_user_initial on users cascade;
-drop trigger if exists user_update_pass on users cascade;
-drop trigger if exists user_promote_demote on users cascade;
-drop trigger if exists user_update_id on users cascade;
+drop trigger if exists update_user_pass on users cascade;
+drop trigger if exists promote_demote_user on users cascade;
+drop trigger if exists update_user_id on users cascade;
 
 create trigger insert_user_initial
     before Insert
@@ -71,19 +74,19 @@ create trigger insert_user_initial
     for each row
 execute procedure userConstructor();
 
-create trigger user_update_pass
+create trigger update_user_pass
     before update of pass
     on users
     for each row
 execute procedure updatePassword();
 
-create trigger user_promote_demote
+create trigger promote_demote_user
     before update of utype
     on users
     for each row
 execute procedure promoteDemoteUser();
 
-create trigger user_update_id
+create trigger update_user_id
     before update of uid
     on users
     for each row

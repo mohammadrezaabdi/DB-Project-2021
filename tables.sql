@@ -1,3 +1,4 @@
+
 drop table if exists award cascade;
 drop table if exists produces cascade;
 drop table if exists writes cascade;
@@ -109,7 +110,7 @@ create table Review
     UID   uuid not null,
     FID   uuid not null,
     RATE  rate not null,
-    DESCL text,
+    DESCL link,
     primary key (UID, FID),
     unique (UID, FID),
     foreign key (UID) references Users (UID),

@@ -57,8 +57,8 @@ begin
 end;
 $$;
 
-create or replace function validateCrewAge(by valid_year, bm valid_month, bd valid_day, dy valid_year, dm valid_month,
-                                           dd valid_day) returns boolean as
+create or replace function isCrewAgeValid(by valid_year, bm valid_month, bd valid_day, dy valid_year, dm valid_month,
+                                          dd valid_day) returns boolean as
 $$
 begin
     if by is not null and dy is not null and by > dy then
@@ -80,10 +80,13 @@ begin
     if new.name is NULL then
         raise exception 'crew name cannot be empty';
     end if;
+    if new.cid is not null then
+        raise exception 'crew id is read only field';
+    end if;
     if new.isdir is false and new.ispro is false and new.isact is false and new.iswrt is false then
         raise exception 'crew should have at least one job';
     end if;
-    if not validateCrewAge(new.byear, new.bmon, new.bday, new.dyear, new.dmon, new.dday) then
+    if not isCrewAgeValid(new.byear, new.bmon, new.bday, new.dyear, new.dmon, new.dday) then
         raise exception 'death date is sooner than birth date';
     end if;
     new.cid := uuid_generate_v3(uuid_ns_oid(), new.name);
@@ -94,7 +97,7 @@ $crew_insert_init$ language plpgsql;
 create or replace function crewUpdateAge() returns trigger as
 $crew_age_update$
 begin
-    if not validateCrewAge(new.byear, new.bmon, new.bday, new.dyear, new.dmon, new.dday) then
+    if not isCrewAgeValid(new.byear, new.bmon, new.bday, new.dyear, new.dmon, new.dday) then
         raise exception 'death date is sooner than birth date';
     end if;
     return new;
@@ -119,9 +122,9 @@ end;
 $user_id_changing$ language plpgsql;
 
 drop trigger if exists insert_crew_initial on crew cascade;
-drop trigger if exists crew_update_age on crew cascade;
-drop trigger if exists crew_update_job on crew cascade;
-drop trigger if exists crew_update_id on crew cascade;
+drop trigger if exists update_crew_age on crew cascade;
+drop trigger if exists update_crew_job on crew cascade;
+drop trigger if exists update_crew_id on crew cascade;
 
 create trigger insert_crew_initial
     before Insert
@@ -129,19 +132,19 @@ create trigger insert_crew_initial
     for each row
 execute procedure crewConstructor();
 
-create trigger crew_update_age
+create trigger update_crew_age
     before update of byear, bmon, bday, dyear, dmon, dday
     on crew
     for each row
 execute procedure crewUpdateAge();
 
-create trigger crew_update_job
+create trigger update_crew_job
     before update of isact, isdir, ispro, iswrt
     on crew
     for each row
 execute procedure crewUpdateJob();
 
-create trigger crew_update_id
+create trigger update_crew_id
     before update of cid
     on crew
     for each row

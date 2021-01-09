@@ -41,7 +41,7 @@ create domain valid_password as text -- Minimum eight characters, at least one l
     check ( value ~ '^(?=.*\d)((?=.*[a-z])|(?=.*[A-Z]))(?=.*[a-zA-Z]).{8,}$');
 
 create domain valid_year as smallint
-    check (value > 1888 and value <= date_part('year', now()));
+    check (value >= 1888 and value <= date_part('year', now()));
 
 create domain valid_month as char(3)
     check (upper(value) in ('JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'));
