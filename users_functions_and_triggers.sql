@@ -1,3 +1,4 @@
+
 create or replace function userConstructor() returns trigger as
 $insert_user_initial$
 begin
@@ -7,10 +8,9 @@ begin
     if new.pass is NULL then
         raise exception 'user password cannot be empty';
     end if;
-    if new.uid is not null then
-        raise exception 'user id is read only field';
+    if new.uid is null then
+        new.uid := uuid_generate_v3(uuid_ns_oid(), new.name);
     end if;
-    new.uid := uuid_generate_v3(uuid_ns_oid(), new.name);
     new.pass := crypt(new.pass, gen_salt('bf'));
     return new;
 end

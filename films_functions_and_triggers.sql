@@ -49,10 +49,12 @@ begin
     if new.tstmp is not null then
         raise exception 'time stamp of film is read only field';
     end if;
-    if new.fid is not null then
-        raise exception 'film id is read only field';
+    if new.fid is null then
+        new.fid = uuid_generate_v1mc();
     end if;
-    new.fid = uuid_generate_v1mc();
+    if new.isser is null then
+        new.isser = false;
+    end if;
     new.tstmp = to_char(current_timestamp, 'YYYY-MM-DD HH:MI:SS');
     return new;
 end;

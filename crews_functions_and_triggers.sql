@@ -1,4 +1,3 @@
-
 create or replace function monthToInt(m valid_month) returns smallint
     language plpgsql
     immutable as
@@ -80,8 +79,8 @@ begin
     if new.name is NULL then
         raise exception 'crew name cannot be empty';
     end if;
-    if new.cid is not null then
-        raise exception 'crew id is read only field';
+    if new.cid is null then
+        new.cid := uuid_generate_v3(uuid_ns_oid(), new.name);
     end if;
     if new.isdir is false and new.ispro is false and new.isact is false and new.iswrt is false then
         raise exception 'crew should have at least one job';
@@ -89,7 +88,6 @@ begin
     if not isCrewAgeValid(new.byear, new.bmon, new.bday, new.dyear, new.dmon, new.dday) then
         raise exception 'death date is sooner than birth date';
     end if;
-    new.cid := uuid_generate_v3(uuid_ns_oid(), new.name);
     return new;
 end;
 $crew_insert_init$ language plpgsql;

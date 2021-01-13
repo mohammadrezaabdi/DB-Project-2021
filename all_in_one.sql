@@ -1130,102 +1130,7 @@ INSERT INTO Language_list ("id", "value") VALUES (E'gbz', E'Zoroastrian Dari');
 INSERT INTO Language_list ("id", "value") VALUES (E'zu', E'Zulu');
 INSERT INTO Language_list ("id", "value") VALUES (E'zun', E'Zuni');
 
---------------- function & triggers
-create or replace function userConstructor() returns trigger as
-$insert_user_initial$
-begin
-    if new.name is NULL then
-        raise exception 'username cannot be empty';
-    end if;
-    if new.pass is NULL then
-        raise exception 'user password cannot be empty';
-    end if;
-    if new.uid is not null then
-        raise exception 'user id is read only field';
-    end if;
-    new.uid := uuid_generate_v3(uuid_ns_oid(), new.name);
-    new.pass := crypt(new.pass, gen_salt('bf'));
-    return new;
-end
-$insert_user_initial$ language plpgsql;
-
-create or replace function updatePassword() returns trigger as
-$user_update_password$
-begin
-    if new.pass is NULL then
-        raise exception 'user password cannot be empty';
-    end if;
-    if old.pass = crypt(new.pass, old.pass) then
-        raise exception 'new password is repetitive';
-    end if;
-    new.pass := crypt(new.pass, gen_salt('bf'));
-    return new;
-end;
-$user_update_password$ language plpgsql;
-
-create or replace function promoteDemoteUser() returns trigger as
-$make_user_pro_free$
-begin
-    if upper(old.utype) ~ upper(new.utype) then
-        raise exception 'redundant promotion/demotion process';
-    end if;
-    new.utype = upper(new.utype);
-    return new;
-end;
-$make_user_pro_free$ language plpgsql;
-
-create or replace function userIDModifying() returns trigger as
-$user_id_changing$
-begin
-    raise exception 'you cannot modify user ID';
-end;
-$user_id_changing$ language plpgsql;
-
--- todo find usage ???
-create or replace function userEdit() returns trigger as
-$can_user_edit$
-begin
-    if upper(new.utype) ~ 'P' then
-        return new;
-    end if;
-    if new.elimit <= 0 then
-        raise exception 'user cannot edit any movies';
-    end if;
-    new.elimit = new.elimit - 1;
-    return new;
-end;
-$can_user_edit$ language plpgsql;
-
-drop trigger if exists insert_user_initial on users cascade;
-drop trigger if exists update_user_pass on users cascade;
-drop trigger if exists promote_demote_user on users cascade;
-drop trigger if exists update_user_id on users cascade;
-
-create trigger insert_user_initial
-    before Insert
-    on users
-    for each row
-execute procedure userConstructor();
-
-create trigger update_user_pass
-    before update of pass
-    on users
-    for each row
-execute procedure updatePassword();
-
-create trigger promote_demote_user
-    before update of utype
-    on users
-    for each row
-execute procedure promoteDemoteUser();
-
-create trigger update_user_id
-    before update of uid
-    on users
-    for each row
-execute procedure userIDModifying();
-
----------
+--------------- triggers & functions
 
 create or replace function monthToInt(m valid_month) returns smallint
     language plpgsql
@@ -1308,8 +1213,8 @@ begin
     if new.name is NULL then
         raise exception 'crew name cannot be empty';
     end if;
-    if new.cid is not null then
-        raise exception 'crew id is read only field';
+    if new.cid is null then
+        new.cid := uuid_generate_v3(uuid_ns_oid(), new.name);
     end if;
     if new.isdir is false and new.ispro is false and new.isact is false and new.iswrt is false then
         raise exception 'crew should have at least one job';
@@ -1317,7 +1222,6 @@ begin
     if not isCrewAgeValid(new.byear, new.bmon, new.bday, new.dyear, new.dmon, new.dday) then
         raise exception 'death date is sooner than birth date';
     end if;
-    new.cid := uuid_generate_v3(uuid_ns_oid(), new.name);
     return new;
 end;
 $crew_insert_init$ language plpgsql;
@@ -1378,7 +1282,102 @@ create trigger update_crew_id
     for each row
 execute procedure crewIDModifying();
 
----------
+--------------------------------------------------------------
+
+create or replace function userConstructor() returns trigger as
+$insert_user_initial$
+begin
+    if new.name is NULL then
+        raise exception 'username cannot be empty';
+    end if;
+    if new.pass is NULL then
+        raise exception 'user password cannot be empty';
+    end if;
+    if new.uid is null then
+        new.uid := uuid_generate_v3(uuid_ns_oid(), new.name);
+    end if;
+    new.pass := crypt(new.pass, gen_salt('bf'));
+    return new;
+end
+$insert_user_initial$ language plpgsql;
+
+create or replace function updatePassword() returns trigger as
+$user_update_password$
+begin
+    if new.pass is NULL then
+        raise exception 'user password cannot be empty';
+    end if;
+    if old.pass = crypt(new.pass, old.pass) then
+        raise exception 'new password is repetitive';
+    end if;
+    new.pass := crypt(new.pass, gen_salt('bf'));
+    return new;
+end;
+$user_update_password$ language plpgsql;
+
+create or replace function promoteDemoteUser() returns trigger as
+$make_user_pro_free$
+begin
+    if upper(old.utype) ~ upper(new.utype) then
+        raise exception 'redundant promotion/demotion process';
+    end if;
+    new.utype = upper(new.utype);
+    return new;
+end;
+$make_user_pro_free$ language plpgsql;
+
+create or replace function userIDModifying() returns trigger as
+$user_id_changing$
+begin
+    raise exception 'you cannot modify user ID';
+end;
+$user_id_changing$ language plpgsql;
+
+-- todo find usage ???
+create or replace function userEdit() returns trigger as
+$can_user_edit$
+begin
+    if upper(new.utype) ~ 'P' then
+        return new;
+    end if;
+    if new.elimit <= 0 then
+        raise exception 'user cannot edit any movies';
+    end if;
+    new.elimit = new.elimit - 1;
+    return new;
+end;
+$can_user_edit$ language plpgsql;
+
+drop trigger if exists insert_user_initial on users cascade;
+drop trigger if exists update_user_pass on users cascade;
+drop trigger if exists promote_demote_user on users cascade;
+drop trigger if exists update_user_id on users cascade;
+
+create trigger insert_user_initial
+    before Insert
+    on users
+    for each row
+execute procedure userConstructor();
+
+create trigger update_user_pass
+    before update of pass
+    on users
+    for each row
+execute procedure updatePassword();
+
+create trigger promote_demote_user
+    before update of utype
+    on users
+    for each row
+execute procedure promoteDemoteUser();
+
+create trigger update_user_id
+    before update of uid
+    on users
+    for each row
+execute procedure userIDModifying();
+
+--------------------------------------------------------------
 
 create or replace function isFilmYearsValid(start_year smallint, finish_year smallint) returns boolean
     language plpgsql
@@ -1430,10 +1429,12 @@ begin
     if new.tstmp is not null then
         raise exception 'time stamp of film is read only field';
     end if;
-    if new.fid is not null then
-        raise exception 'film id is read only field';
+    if new.fid is null then
+        new.fid = uuid_generate_v1mc();
     end if;
-    new.fid = uuid_generate_v1mc();
+    if new.isser is null then
+        new.isser = false;
+    end if;
     new.tstmp = to_char(current_timestamp, 'YYYY-MM-DD HH:MI:SS');
     return new;
 end;
