@@ -60,16 +60,16 @@ create or replace function isCrewAgeValid(by valid_year, bm valid_month, bd vali
                                           dd valid_day) returns boolean as
 $$
 begin
-    if by is not null and dy is not null and by > dy then
-        return false;
+    if by is not null and dy is not null and by < dy then
+        return true;
     end if;
-    if bm is not null and dm is not null and bm > dm then
-        return false;
+    if bm is not null and dm is not null and by = dy and monthToInt(bm) < monthToInt(dm) then
+        return true;
     end if;
-    if bd is not null and dd is not null and bd > dd then
-        return false;
+    if bd is not null and dd is not null and by = dy and monthToInt(bm) = monthToInt(dm) and bd <= dd then
+        return true;
     end if;
-    return true;
+    return false;
 end;
 $$ language plpgsql;
 
