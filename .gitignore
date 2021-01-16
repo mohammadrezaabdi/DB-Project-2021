@@ -8,4 +8,6 @@
 !*.txt
 !*.pdf
 !*.csv
-
+!Dataset_Handling*
+!Dataset_Handling/src/*
+!*.java

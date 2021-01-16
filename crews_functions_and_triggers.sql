@@ -69,6 +69,9 @@ begin
     if bd is not null and dd is not null and by = dy and monthToInt(bm) = monthToInt(dm) and bd <= dd then
         return true;
     end if;
+    if by is not null and bm is not null and bd is not null and dy is null and dm is null and dd is null then
+        return true;
+    end if;
     return false;
 end;
 $$ language plpgsql;
