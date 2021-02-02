@@ -1,20 +1,5 @@
 
-drop table if exists award cascade;
-drop table if exists produces cascade;
-drop table if exists writes cascade;
-drop table if exists acts cascade;
-drop table if exists firstRole cascade;
-drop table if exists interestedin cascade;
-drop table if exists Review cascade;
-drop table if exists country cascade;
-drop table if exists picturelink cascade;
-drop table if exists trailerlink cascade;
-drop table if exists Review cascade;
-drop table if exists season cascade;
-drop table if exists film cascade;
-drop table if exists crew cascade;
 drop table if exists users cascade;
-
 create table Users
 (
     UID    uuid                        not null,
@@ -27,6 +12,7 @@ create table Users
     primary key (UID)
 );
 
+drop table if exists crew cascade;
 create table Crew
 (
     CID   uuid          not null,
@@ -47,15 +33,16 @@ create table Crew
     primary key (CID)
 );
 
+drop table if exists film cascade;
 create table Film
 (
     FID   uuid        not null,
-    NAME  text        not null, -- todo set proper regex
+    NAME  movie_name  not null,
     FYR   valid_year,
     TYR   valid_year,
     LANG  varchar(64),
     DUR   normal_number,
-    GENRE set_of_words,         -- todo checking with real names by trigger
+    GENRE genre,
     BUDG  million_dollar,
     PLOTL link,
     REVEN million_dollar,
@@ -68,6 +55,7 @@ create table Film
     foreign key (DIRID) references Crew (CID) on update cascade on delete cascade
 );
 
+drop table if exists season cascade;
 create table Season
 (
     FID   uuid          not null,
@@ -78,6 +66,7 @@ create table Season
     foreign key (FID) references Film (FID) on update cascade on delete cascade
 );
 
+drop table if exists trailerlink cascade;
 create table TrailerLink
 (
     FID  uuid not null,
@@ -87,6 +76,7 @@ create table TrailerLink
     foreign key (FID) references Film (FID) on update cascade on delete cascade
 );
 
+drop table if exists picturelink cascade;
 create table PictureLink
 (
     FID  uuid not null,
@@ -96,6 +86,7 @@ create table PictureLink
     foreign key (FID) references Film (FID) on update cascade on delete cascade
 );
 
+drop table if exists country cascade;
 create table Country
 (
     FID  uuid        not null,
@@ -105,6 +96,7 @@ create table Country
     foreign key (FID) references Film (FID) on update cascade on delete cascade
 );
 
+drop table if exists Review cascade;
 create table Review
 (
     UID   uuid not null,
@@ -117,6 +109,7 @@ create table Review
     foreign key (FID) references Film (FID)
 );
 
+drop table if exists interestedin cascade;
 create table InterestedIn
 (
     UID uuid not null,
@@ -127,6 +120,7 @@ create table InterestedIn
     foreign key (FID) references Film (FID)
 );
 
+drop table if exists firstRole cascade;
 create table FirstRole
 (
     CID uuid not null,
@@ -137,6 +131,7 @@ create table FirstRole
     foreign key (FID) references Film (FID)
 );
 
+drop table if exists acts cascade;
 create table Acts
 (
     CID uuid not null,
@@ -147,6 +142,7 @@ create table Acts
     foreign key (FID) references Film (FID)
 );
 
+drop table if exists writes cascade;
 create table Writes
 (
     CID uuid not null,
@@ -157,6 +153,7 @@ create table Writes
     foreign key (FID) references Film (FID)
 );
 
+drop table if exists produces cascade;
 create table Produces
 (
     CID uuid not null,
@@ -167,6 +164,7 @@ create table Produces
     foreign key (FID) references Film (FID)
 );
 
+drop table if exists award cascade;
 create table Award
 (
     TITLE multi_word_name not null, -- todo checking with real names by trigger
