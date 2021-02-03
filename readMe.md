@@ -1,7 +1,7 @@
 # Description
-the simple IMDB implementation with Postgres sql
+A simple IMDB implementation with PostgreSQL
 
 ### How to Run
-run all queries in all_in_one.sql for building Tables, Domains, Triggers & Views.
+Run all queries included in all_in_one.sql to create Tables, Domains, Triggers & Views.
 
-there is a sample data set in /DataSet_Handling/all_insertions_in_one.sql which you can run & insert the data in those tables.
+There is a sample dataset in /DataSet_Handling/all_insertions_in_one.sql which you can use it to insert data into the tables.

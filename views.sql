@@ -63,12 +63,12 @@ create view All_Award
 
 drop view if exists Film_Reviews cascade;
 create view Film_Reviews
-	as select Review.UID, Users.NAME, RATE, DESCL
-from Review inner join Users on Review.UID = Users.UID;
+	as select Review.FID, Users.NAME, RATE, DESCL
+    from Review inner join Users on Review.UID = Users.UID;
 
 drop view if exists User_Reviews cascade;
 create view User_Reviews
-	as select Review.FID, NAME, RATE, DESCL
+	as select Review.UID, NAME, RATE, DESCL
 	from Review inner join Film on Review.FID = Film.FID;
 
 drop view if exists Favorite_List cascade;
